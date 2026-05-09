@@ -1,38 +1,29 @@
-# comment
-nombre = "hola"
-print("hola")
+# Nombres: Abraham Camilo Corredor Duran-
+# Curso : Programación
+# Grupo : 198
+
+# Inicio del codigo
 
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime
 
-# Configuración de Logs
+# --- CONFIGURACIÓN DE LOGS ---
 logging.basicConfig(
     filename='software_fj_errors.log',
     level=logging.ERROR,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-class SoftwareFJError(Exception):
-    """Clase base para excepciones del sistema."""
-    pass
+# --- EXCEPCIONES PERSONALIZADAS ---
+class SoftwareFJError(Exception): pass
+class DatoInvalidoError(SoftwareFJError): pass
 
-class ReservaInvalidaError(SoftwareFJError):
-    """Se lanza cuando una reserva no cumple los requisitos."""
-    pass
-
-class ServicioNoDisponibleError(SoftwareFJError):
-    """Se lanza cuando el servicio solicitado está agotado o fuera de horario."""
-    pass
+# --- CLASES BASE Y SERVICIOS ---
 class EntidadBase(ABC):
     def __init__(self, id_entidad):
-        self._id_entidad = id_entidad  # Encapsulamiento protegido
+        self._id_entidad = id_entidad
 
-    @abstractmethod
-    def mostrar_detalle(self):
-        pass
-
-class Servicio(EntidadBase):
+class Servicio(EntidadBase, ABC):
     def __init__(self, id_servicio, nombre, precio_base):
         super().__init__(id_servicio)
         self.nombre = nombre
@@ -42,58 +33,102 @@ class Servicio(EntidadBase):
     def calcular_costo(self, cantidad):
         pass
 
-    def mostrar_detalle(self):
-        return f"Servicio: {self.nombre} (ID: {self._id_entidad})"
-
-# Clases Derivadas
 class SalaReunion(Servicio):
     def calcular_costo(self, horas):
-        # Aplicamos un recargo si son más de 5 horas (Lógica de negocio)
-        if horas > 5:
-            return (self.precio_base * horas) * 0.9  # Descuento 10%
         return self.precio_base * horas
 
 class AlquilerEquipo(Servicio):
     def calcular_costo(self, dias):
         return self.precio_base * dias
-class Cliente(EntidadBase):
-    def __init__(self, id_cliente, nombre, email):
-        super().__init__(id_cliente)
-        self.__nombre = nombre
-        self.__email = self.__validar_email(email)
 
-    def __validar_email(self, email):
-        if "@" not in email:
-            raise ValueError(f"Email inválido: {email}")
-        return email
+class AsesoriaEspecializada(Servicio):
+    def calcular_costo(self, sesiones):
+        # Las asesorías tienen un cargo fijo administrativo de 10.000
+        return (self.precio_base * sesiones) + 10.000
+
+# --- CLASE CLIENTE ---
+class Cliente:
+    def __init__(self, nombre, correo):
+        if not nombre or "@" not in correo:
+            raise DatoInvalidoError("Datos de cliente mal formados.")
+        self.__nombre = nombre  # Encapsulamiento privado
+        self.__correo = correo
 
     @property
     def nombre(self):
         return self.__nombre
 
-    def mostrar_detalle(self):
-        return f"Cliente: {self.__nombre} | Contacto: {self.__email}"
+# --- SISTEMA INTEGRAL ---
+class SistemaSoftwareFJ:
+    def __init__(self):
+        self.servicios = {
+            "1": SalaReunion("S01", "Reserva de Sala", 50000),
+            "2": AlquilerEquipo("E01", "Alquiler de PC/Proyector", 30000),
+            "3": AsesoriaEspecializada("A01", "Asesoría Técnica", 80000)
+        }
+        self.reservas = []
+
+    def ejecutar(self):
+        print("--- BIENVENIDO Al SOFTWARE ---")
+        
+        try:
+            # 1. Registro de Cliente
+            nombre = input("Ingrese nombre del cliente: ")
+            email = input("Ingrese correo electrónico: ")
+            cliente = Cliente(nombre, email)
+
+            # 2. Selección de Servicio
+            print("\nServicios Disponibles:")
+            for k, v in self.servicios.items():
+                print(f"{k}. {v.nombre} (${v.precio_base})")
+            
+            opcion = input("Seleccione el tipo de servicio (1-3): ")
+            if opcion not in self.servicios:
+                raise DatoInvalidoError("Opción de servicio no válida.")
+
+            servicio_elegido = self.servicios[opcion]
+
+            # 3. Cantidad (Horas/Días/Sesiones)
+            cantidad_str = input(f"Ingrese la cantidad (horas) para {servicio_elegido.nombre}: ")
+            if not cantidad_str.isdigit():
+                raise ValueError("La cantidad debe ser un número entero.")
+            
+            cantidad = int(cantidad_str)
+            total = servicio_elegido.calcular_costo(cantidad)
+
+            # 4. Confirmación y Almacenamiento
+            reserva = {
+                "cliente": cliente.nombre,
+                "servicio": servicio_elegido.nombre,
+                "total": total
+            }
+            self.reservas.append(reserva)
+
+            print(f"\n--- RECIBO DE RESERVA ---")
+            print(f"Cliente: {reserva['cliente']}")
+            print(f"Servicio: {reserva['servicio']}")
+            print(f"Total a Pagar: ${total}")
+
+        except DatoInvalidoError as e:
+            print(f"Error de validación: {e}")
+            logging.error(f"Validación fallida: {e}")
+        except ValueError as e:
+            print("Error: Se esperaba un valor numérico.")
+            logging.error(f"Error de valor: {e}")
+        except Exception as e:
+            # Encadenamiento y captura general para mantener la estabilidad
+            print(f"Ocurrió un error inesperado. El sistema sigue activo.")
+            logging.error(f"Error crítico: {e}", exc_info=True)
+        finally:
+            print("\nGracias por usar el sistema de Software.")
+
+# --- INICIO DE LA APLICACIÓN ---
 if __name__ == "__main__":
-    sistema = sistema_reserva() 
-
-    try:
-        # 1. Creación de datos
-        cliente1 = Cliente("C001", "Abraham Corredor", "abraham@ejemplo.com")
-        sala_vips = SalaReunion("S101", "Sala Ejecutiva", 50.0)
-        laptop = AlquilerEquipo("E201", "Laptop Gaming", 30.0)
-
-        # 2. Operación Normal
-        sistema.registrar_reserva(cliente1, sala_vips, 6) # Con descuento
-
-        # 3. Operación con Error de Lógica (Cantidad negativa)
-        sistema.registrar_reserva(cliente1, laptop, -1)
-
-        # 4. Operación con Error de Tipo (Simulación de caída controlada)
-        # Intentar calcular costo con un string en lugar de número
-        sistema.registrar_reserva(cliente1, sala_vips, "ocho")
-
-    except ValueError as e:
-        print(f"Error crítico al crear entidades: {e}")
+    app = SistemaSoftwareFJ()
+    # Ciclo para que la app no se cierre tras un error
+    while True:
+        app.ejecutar()
+        if input("\n¿Desea realizar otra operación? (si/no): ").lower() != 'si':
+            break
     
-    # El sistema sigue vivo y puede mostrar resultados
-    sistema.listar_reservas()
+   
