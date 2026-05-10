@@ -132,17 +132,6 @@ if __name__ == "__main__":
         if input("\n¿Desea realizar otra operación? (si/no): ").lower() != 'si':
             break
     
-# ============================================================
-# SISTEMA DE RESERVAS
-# ============================================================
-# Este programa implementa:
-# - Clase Reserva
-# - Integración de cliente, servicio, duración y estado
-# - Confirmación y cancelación de reservas
-# - Procesamiento con manejo de excepciones
-# - Métodos sobrecargados para cálculo de costos
-# - Archivo de logs para registrar eventos y errores
-# ============================================================
 
 import logging
 from datetime import datetime
@@ -150,9 +139,7 @@ from datetime import datetime
 # ============================================================
 # CONFIGURACIÓN DEL ARCHIVO LOG
 # ============================================================
-# Todos los eventos importantes y errores se guardarán
-# automáticamente en el archivo "reservas.log"
-# ============================================================
+
 
 logging.basicConfig(
     filename="reservas.log",
@@ -169,9 +156,7 @@ class Reserva:
     # --------------------------------------------------------
     # Constructor
     # --------------------------------------------------------
-    # Inicializa los datos principales de la reserva
-    # --------------------------------------------------------
-
+ 
     def __init__(self, cliente, servicio, duracion, costo_base):
 
         self.cliente = cliente
@@ -233,8 +218,7 @@ class Reserva:
     # --------------------------------------------------------
     # Método para procesar la reserva
     # --------------------------------------------------------
-    # Solo se puede procesar si está confirmada
-    # --------------------------------------------------------
+  
 
     def procesar(self):
 
