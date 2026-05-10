@@ -1,4 +1,5 @@
 # Nombres: Abraham Camilo Corredor Duran-
+#          Johan Santiago Mateus Alba- 
 # Curso : Programación
 # Grupo : 198
 
@@ -131,4 +132,214 @@ if __name__ == "__main__":
         if input("\n¿Desea realizar otra operación? (si/no): ").lower() != 'si':
             break
     
+ # ============================================================
+# SISTEMA DE RESERVAS
+# ============================================================
+
+import logging
+from datetime import datetime
+
+# ============================================================
+# CONFIGURACIÓN DEL ARCHIVO LOG
+# ============================================================
+
+logging.basicConfig(
+    filename="reservas.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+# ============================================================
+# CLASE RESERVA
+# ============================================================
+
+class Reserva:
+
+    # --------------------------------------------------------
+    # Constructor
+    # --------------------------------------------------------
+    # Inicializa los datos principales de la reserva
+    # --------------------------------------------------------
+
+    def __init__(self, cliente, servicio, duracion, costo_base):
+
+        self.cliente = cliente
+        self.servicio = servicio
+        self.duracion = duracion
+        self.costo_base = costo_base
+        self.estado = "Pendiente"
+
+        logging.info(f"Reserva creada para {self.cliente}")
+
+    # --------------------------------------------------------
+    # Método para confirmar la reserva
+    # --------------------------------------------------------
+
+    def confirmar(self):
+
+        try:
+
+            if self.estado == "Cancelada":
+                raise Exception("No se puede confirmar una reserva cancelada")
+
+            self.estado = "Confirmada"
+
+            logging.info(
+                f"Reserva confirmada para {self.cliente}"
+            )
+
+            print("Reserva confirmada correctamente")
+
+        except Exception as error:
+
+            logging.error(f"Error al confirmar reserva: {error}")
+            print("Error:", error)
+
+    # --------------------------------------------------------
+    # Método para cancelar la reserva
+    # --------------------------------------------------------
+
+    def cancelar(self):
+
+        try:
+
+            if self.estado == "Cancelada":
+                raise Exception("La reserva ya estaba cancelada")
+
+            self.estado = "Cancelada"
+
+            logging.info(
+                f"Reserva cancelada para {self.cliente}"
+            )
+
+            print("Reserva cancelada correctamente")
+
+        except Exception as error:
+
+            logging.error(f"Error al cancelar reserva: {error}")
+            print("Error:", error)
+
+    # --------------------------------------------------------
+    # Método para procesar la reserva
+    # --------------------------------------------------------
    
+    def procesar(self):
+
+        try:
+
+            if self.estado != "Confirmada":
+                raise Exception(
+                    "La reserva debe estar confirmada antes de procesarse"
+                )
+
+            logging.info(
+                f"Reserva procesada para {self.cliente}"
+            )
+
+            print("Reserva procesada exitosamente")
+
+        except Exception as error:
+
+            logging.error(f"Error al procesar reserva: {error}")
+            print("Error:", error)
+
+    # ========================================================
+    # MÉTODOS SOBRECARGADOS
+    # ========================================================
+  
+
+    # --------------------------------------------------------
+    # Cálculo simple del costo
+    # --------------------------------------------------------
+
+    def calcular_costo(self):
+
+        return self.costo_base
+
+    # --------------------------------------------------------
+    # Cálculo con impuesto
+    # --------------------------------------------------------
+
+    def calcular_costo_impuesto(self, impuesto):
+
+        total = self.costo_base + (self.costo_base * impuesto)
+
+        return total
+
+    # --------------------------------------------------------
+    # Cálculo con impuesto y descuento
+    # --------------------------------------------------------
+
+    def calcular_costo_completo(self, impuesto=0, descuento=0):
+
+        total = self.costo_base
+
+        # Aplicar impuesto
+        total += total * impuesto
+
+        # Aplicar descuento
+        total -= total * descuento
+
+        return total
+
+    # --------------------------------------------------------
+    # Mostrar información completa
+    # --------------------------------------------------------
+
+    def mostrar_reserva(self):
+
+        print("\n========== RESERVA ==========")
+        print("Cliente:", self.cliente)
+        print("Servicio:", self.servicio)
+        print("Duración:", self.duracion, "horas")
+        print("Costo base:", self.costo_base)
+        print("Estado:", self.estado)
+        print("=============================\n")
+
+
+# ============================================================
+# PROGRAMA PRINCIPAL
+# ============================================================
+
+try:
+
+    # Crear objeto reserva
+    reserva1 = Reserva(
+        "Santiago Mateus",
+        "Spa Premium",
+        3,
+        150000
+    )
+
+    # Mostrar información
+    reserva1.mostrar_reserva()
+
+    # Confirmar reserva
+    reserva1.confirmar()
+
+    # Procesar reserva
+    reserva1.procesar()
+
+    # ========================================================
+    # PRUEBAS DE LOS MÉTODOS SOBRECARGADOS
+    # ========================================================
+
+    print("Costo normal:",
+          reserva1.calcular_costo())
+
+    print("Costo con impuesto:",
+          reserva1.calcular_costo_impuesto(0.19))
+
+    print("Costo con impuesto y descuento:",
+          reserva1.calcular_costo_completo(
+              impuesto=0.19,
+              descuento=0.10
+          ))
+
+    # Cancelar reserva
+    reserva1.cancelar()
+
+except Exception as error_general:
+
+    logging.critical(f"Error general del sistema: {error_general}")
+    print("Error crítico:", error_general)  
